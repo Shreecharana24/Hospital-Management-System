@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Appointments</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f6fa; }
+        .container {
+            background: white; padding: 30px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 1000px;
+        }
+        h2 { color: #2f3640; }
+        .btn {
+            padding: 6px 12px; border: none; border-radius: 4px;
+            color: white; cursor: pointer; text-decoration: none; margin-right: 8px;
+        }
+        .back { background-color: #718093; }
+        .cancel { background-color: #e84118; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f1f2f6; font-weight: bold; }
+        tr:hover { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>My Appointments</h2>
+            <a href="{{ url_for('patient.patient_dashboard') }}" class="btn back">Back to Dashboard</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="alert {% if category == 'success' %}alert-success{% elif category == 'error' %}alert-danger{% elif category == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if appointments %}
+            <table>
+                <tr>
+                    <th>Sr. No.</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                {% for appt in appointments %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ appt.doctor.user.name }}</td>
+                    <td>{{ appt.doctor.department.name if appt.doctor.department else appt.doctor.specialization or 'N/A' }}</td>
+                    <td>{{ appt.date }}</td>
+                    <td>{{ appt.time }}</td>
+                    <td>{{ appt.status }}</td>
+                    <td>
+                        {% if appt.status != 'Cancelled' %}
+                            <a href="{{ url_for('patient.cancel_appointment', appt_id=appt.id) }}" class="btn cancel">Cancel</a>
+                        {% else %}
+                            <span style="color: #999;">Cancelled</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p style="text-align: center; color: #666; margin-top: 20px;">No appointments found.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

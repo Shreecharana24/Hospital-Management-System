@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Availability</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f6fa;
+        }
+        h2 {
+            color: #2f3640;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f1f2f6;
+        }
+        .btn {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #44bd32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #009432;
+        }
+        .btn-back {
+            background-color: #00a8ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            cursor: pointer;
+            text-decoration: none;
+            float: right;
+        }
+        .btn-back:hover {
+            background-color: #0097e6;
+        }
+        .green-text {
+            color: green;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .red-text {
+            color: red;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .slot-available {
+            background: #e6ffed;
+            border-color: #2ecc71 !important;
+            color: #2d7a3e;
+        }
+        .slot-unavailable {
+            background: #ffecec;
+            border-color: #e74c3c !important;
+            color: #7a2626;
+        }
+        .slot-none {
+            background: #f8f9fa;
+            color: #666;
+        }
+        .slot-disabled {
+            background: #f0f0f0 !important;
+            color: #6c757d !important;
+            border-color: #dcdcdc !important;
+            opacity: 0.9;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+        }
+        .slot-disabled.slot-available, .slot-disabled.slot-unavailable, .slot-disabled.slot-none {
+            background: #f0f0f0 !important;
+            color: #6c757d !important;
+            border-color: #dcdcdc !important;
+        }
+        .slot-toggle:not(:disabled) {
+            cursor: pointer;
+        }
+        .slot-toggle:disabled {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="{{ url_for('doctor.doctor_dashboard') }}" class="btn-back">Back</a>
+        <h2>Doctor’s Availability</h2>
+
+                {% set _msgs = get_flashed_messages(with_categories=true) %}
+                {% if _msgs %}
+                    {# Show only the most recent flash to avoid flooding the UI #}
+                    {% set category, msg = _msgs[-1] %}
+                    <div class="mb-3">
+                        <div class="alert {% if category == 'success' %}alert-success{% elif category == 'error' %}alert-danger{% elif category == 'warning' %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                            {{ msg }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% endif %}
+
+        <div class="form-section">
+            <p>Click a slot to toggle availability. Green = Available, Red = Not available. Click Save to confirm changes.</p>
+
+            <form method="POST" action="{{ url_for('doctor.save_availability') }}" id="availabilityForm">
+                <div id="grid" style="display:flex;gap:16px;flex-wrap:wrap;">
+                    {% for d in next_7 %}
+                    {% set date_str = d.isoformat() %}
+                    <div class="day-column" style="min-width:170px;">
+                        <div style="background:#eef; padding:8px; border-radius:6px; text-align:center; margin-bottom:8px;">{{ d.strftime('%d/%m/%Y') }}</div>
+                        {% for slot in slots %}
+                            {% set av = avail_map.get(date_str, {}).get(slot.label) if avail_map else None %}
+                            {% set status = av.status if av else None %}
+                            {% set expired = disabled_map.get(date_str, {}).get(slot.label) if disabled_map else False %}
+
+                            <button type="button" class="slot-box slot-toggle {% if status == 'Available' %}slot-available{% elif status == 'Unavailable' %}slot-unavailable{% else %}slot-none{% endif %} {% if expired %}slot-disabled{% endif %}"
+                                    data-date="{{ date_str }}"
+                                    data-slot="{{ slot.label }}"
+                                    data-current-status="{{ status or 'none' }}"
+                                    style="width:100%; padding:8px; border-radius:6px; border:2px solid #ccc; text-align:center; margin-bottom:8px;"
+                                    {% if expired %}disabled{% endif %}>
+                                <div style="font-weight:bold">{{ slot.label }}</div>
+                                <div class="slot-text" style="margin-top:6px;">
+                                    {% if expired %}
+                                        Expired
+                                    {% elif status == 'Available' %}
+                                        Available
+                                    {% elif status == 'Unavailable' %}
+                                        Not Available
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </div>
+                            </button>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top:12px;">
+                    <button type="submit" class="btn" style="background:#2ecc71;">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const slotChanges = {};
+
+        document.querySelectorAll('.slot-toggle').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.disabled) return;
+                
+                const date = this.dataset.date;
+                const slot = this.dataset.slot;
+                const currentStatus = this.dataset.currentStatus;
+                
+                let nextStatus;
+                if (currentStatus === 'none') {
+                    nextStatus = 'Available';
+                } else if (currentStatus === 'Available') {
+                    nextStatus = 'Unavailable';
+                } else {
+                    nextStatus = 'none';
+                }
+                
+                this.classList.remove('slot-none', 'slot-available', 'slot-unavailable');
+                if (nextStatus === 'Available') {
+                    this.classList.add('slot-available');
+                    this.querySelector('.slot-text').textContent = 'Available';
+                } else if (nextStatus === 'Unavailable') {
+                    this.classList.add('slot-unavailable');
+                    this.querySelector('.slot-text').textContent = 'Not Available';
+                } else {
+                    this.classList.add('slot-none');
+                    this.querySelector('.slot-text').textContent = '--';
+                }
+                
+                const key = `${date}|${slot}`;
+                slotChanges[key] = nextStatus;
+                this.dataset.currentStatus = nextStatus;
+            });
+        });
+
+        document.getElementById('availabilityForm').addEventListener('submit', function(e) {
+            this.querySelectorAll('input[name^="change_"]').forEach(inp => inp.remove());
+            
+            Object.keys(slotChanges).forEach(key => {
+                const [date, slot] = key.split('|');
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `change_${key}`;
+                input.value = slotChanges[key];
+                this.appendChild(input);
+            });
+        });
+    </script>
+    </div>
+</body>
+</html>

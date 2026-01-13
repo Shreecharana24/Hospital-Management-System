@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ department.name }} Department</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 30px; 
+      background-color: #f5f6fa;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      color: #2f3640;
+      margin: 0;
+    }
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .btn-history { background-color: #0984e3; }
+    .btn-history:hover { background-color: #0770c9; }
+    .btn-logout { background-color: #d63031; }
+    .btn-logout:hover { background-color: #b82e2e; }
+    .section {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    .section h2 {
+      color: #2f3640;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .overview-text {
+      color: #636e72;
+      line-height: 1.6;
+    }
+    .doctors-list {
+      margin-top: 20px;
+    }
+    .doctor-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      background-color: #f9f9f9;
+    }
+    .doctor-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: #2f3640;
+      flex: 1;
+    }
+    .doctor-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 13px;
+      transition: 0.3s;
+    }
+    .btn-check { background-color: #44bd32; }
+    .btn-check:hover { background-color: #38ad23; }
+    .btn-view { background-color: #0984e3; }
+    .btn-view:hover { background-color: #0770c9; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{ department.name }} Department</h1>
+    <div class="header-buttons">
+      <a href="{{ url_for('patient.patient_appointments') }}" class="btn btn-history">History</a>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Overview</h2>
+    <p class="overview-text">
+      {{ department.description }}
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Doctors' list</h2>
+    <div class="doctors-list">
+      {% if doctors %}
+        {% for doc in doctors %}
+        <div class="doctor-row">
+          <div class="doctor-name">Dr. {{ doc.user.name }}</div>
+          <div class="doctor-actions">
+            <a href="{{ url_for('patient.doctor_availability_for_patient', doctor_id=doc.id) }}" class="btn-action btn-check">check availability</a>
+            <a href="{{ url_for('patient.doctor_details', doctor_id=doc.id) }}" class="btn-action btn-view">view details</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color: #636e72; text-align: center;">No doctors found in this department.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

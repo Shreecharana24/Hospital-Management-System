@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Patient</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f6fa;
+        }
+        h2 {
+            color: #2f3640;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #44bd32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #009432;
+        }
+    </style>
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0;">Add Patient</h2>
+        <a href="{{ url_for('admin.admin_dashboard') }}" style="background:#00a8ff; color:white; padding:6px 12px; border-radius:6px; text-decoration:none;">Back</a>
+    </div>
+    <form method="POST">
+        <label>Name:</label>
+        <input type="text" name="name" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" required>
+
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <label>Age:</label>
+        <input type="number" name="age" required>
+
+        <label>Gender:</label>
+        <select name="gender" required>
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <label>Phone:</label>
+        <input 
+            type="tel" 
+            name="phone" 
+            pattern="[6-9]{1}[0-9]{9}" 
+            maxlength="10" 
+            minlength="10" 
+            title="Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9" 
+            required>
+
+
+        <label>Address:</label>
+        <input type="text" name="address">
+
+        <button type="submit">Add Patient</button>
+    </form>
+</body>
+</html>

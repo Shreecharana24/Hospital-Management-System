@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f6fa;
+        }
+        h2 {
+            color: #2f3640;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        .details {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f1f2f6;
+        }
+        .btn-back {
+            background-color: #00a8ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            cursor: pointer;
+            float: right;
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background-color: #0097e6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        {%- if current_user.is_authenticated -%}
+            {%- if current_user.role == 'admin' -%}
+                {%- set fallback = url_for('admin.admin_dashboard') -%}
+            {%- elif current_user.role == 'doctor' -%}
+                {%- set fallback = url_for('doctor.doctor_dashboard') -%}
+            {%- else -%}
+                {%- set fallback = url_for('patient.patient_dashboard') -%}
+            {%- endif -%}
+        {%- else -%}
+            {%- set fallback = url_for('auth.login') -%}
+        {%- endif -%}
+
+        <a href="javascript:if(history.length>1){history.back();}else{window.location='{{ fallback }}';}" class="btn-back">Back</a>
+        <h2>Patient History</h2>
+
+        <div class="details">
+            <p><strong>Patient Name:</strong> {{ patient.user.name }}</p>
+            {% if appointments %}
+                <p><strong>Doctor’s Name:</strong> {{ appointments[0].doctor.user.name }}</p>
+                <p><strong>Department:</strong> {{ appointments[0].doctor.specialization }}</p>
+            {% endif %}
+        </div>
+
+        <table>
+            <tr>
+                <th>Visit No.</th>
+                <th>Visit Type</th>
+                <th>Tests Done</th>
+                <th>Diagnosis</th>
+                <th>Prescription</th>
+                <th>Medicines</th>
+            </tr>
+            {% for appt in appointments %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ appt.treatment.visit_type if appt.treatment and appt.treatment.visit_type else '-' }}</td>
+                <td>{{ appt.treatment.tests_done if appt.treatment and appt.treatment.tests_done else '-' }}</td>
+                <td>{{ appt.treatment.diagnosis if appt.treatment else '-' }}</td>
+                <td>{{ appt.treatment.prescription if appt.treatment else '-' }}</td>
+                <td>
+                    {% if appt.treatment and appt.treatment.notes %}
+                        {% if 'Medicines:' in appt.treatment.notes %}
+                            {{ appt.treatment.notes.split('Medicines: ')[-1] }}
+                        {% else %}
+                            {{ appt.treatment.notes }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

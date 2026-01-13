@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profile</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f6fa;
+        }
+
+        .form-container {
+            background: white;
+            width: 450px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            background-color: #44bd32;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: #2ecc71;
+        }
+
+        .cancel-btn {
+            margin-top: 10px;
+            display: block;
+            text-align: center;
+            background-color: #718093;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .cancel-btn:hover {
+            background-color: #57606f;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'logout.html' %}
+
+    <div class="form-container">
+        <h2>Edit Profile</h2>
+
+        <form method="POST">
+
+            <label>Name:</label>
+            <input type="text" name="name" value="{{ current_user.name }}" required>
+
+            <label>Email:</label>
+            <input type="email" name="email" value="{{ current_user.email }}" required>
+
+            <label>Age:</label>
+            <input type="number" name="age" value="{{ patient.age }}">
+
+            <label>Gender:</label>
+            <select name="gender">
+                <option value="Male" {% if patient.gender == "Male" %}selected{% endif %}>Male</option>
+                <option value="Female" {% if patient.gender == "Female" %}selected{% endif %}>Female</option>
+                <option value="Other" {% if patient.gender == "Other" %}selected{% endif %}>Other</option>
+            </select>
+
+            <label>Phone:</label>
+                <input 
+                    type="tel"
+                    name="phone"
+                    value="{{ patient.phone or '' }}"
+                    pattern="[6-9]{1}[0-9]{9}"
+                    minlength="10"
+                    maxlength="10"
+                    title="Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9"
+                    required
+                >
+
+
+            <label>Address:</label>
+            <textarea name="address">{{ patient.address }}</textarea>
+
+            <button type="submit" class="btn">Save Changes</button>
+        </form>
+
+        <a href="{{ url_for('patient.patient_dashboard') }}" class="cancel-btn">Cancel</a>
+    </div>
+
+</body>
+</html>
